@@ -1,0 +1,38 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+int main() {
+    srand(time(0)); // Seed random number generator
+    int numberToGuess = rand() % 100 + 1; // Generate random number between 1 and 100
+    int tries = 0;
+
+    cout << "Welcome to the number guessing game!" << endl;
+    cout << "I'm thinking of a number between 1 and 100." << endl;
+
+    while (true) {
+        int userGuess;
+        cout << "Take a guess: ";
+        cin >> userGuess;
+
+        if (userGuess < 1 || userGuess > 100) {
+            cout << "Please enter a number between 1 and 100." << endl;
+            continue;
+        }
+
+        tries++;
+
+        if (userGuess == numberToGuess) {
+            cout << "Congratulations! You found the number in " << tries << " tries." << endl;
+            break;
+        } else if (userGuess < numberToGuess) {
+            cout << "Your guess is too low!" << endl;
+        } else {
+            cout << "Your guess is too high!" << endl;
+        }
+    }
+
+    return 0;
+}
