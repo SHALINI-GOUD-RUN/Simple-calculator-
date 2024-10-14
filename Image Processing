@@ -1,0 +1,140 @@
+#include <opencv2/opencv.hpp>
+#include <iostream>
+
+using namespace cv;
+using namespace std;
+
+// Function prototypes
+Mat load_image(const string& filename);
+void display_image(const Mat& image);
+Mat apply_grayscale(const Mat& image);
+Mat apply_blur(const Mat& image);
+Mat apply_sharpen(const Mat& image);
+Mat adjust_colors(const Mat& image, int brightness, int contrast);
+Mat crop_image(const Mat& image, Rect roi);
+Mat resize_image(const Mat& image, Size new_size);
+
+int main() {
+    string filename;
+    cout << "Enter image filename: ";
+    cin >> filename;
+
+    Mat image = load_image(filename);
+
+    if (image.empty()) {
+        cerr << "Error loading image." << endl;
+        return 1;
+    }
+
+    display_image(image);
+
+    int choice;
+    while (true) {
+        cout << "Image Processing Menu:" << endl;
+        cout << "1. Grayscale" << endl;
+        cout << "2. Blur" << endl;
+        cout << "3. Sharpen" << endl;
+        cout << "4. Color Adjustment" << endl;
+        cout << "5. Crop" << endl;
+        cout << "6. Resize" << endl;
+        cout << "7. Save Image" << endl;
+        cout << "8. Exit" << endl;
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                image = apply_grayscale(image);
+                break;
+            case 2:
+                image = apply_blur(image);
+                break;
+            case 3:
+                image = apply_sharpen(image);
+                break;
+            case 4: {
+                int brightness, contrast;
+                cout << "Enter brightness (-255 to 255): ";
+                cin >> brightness;
+                cout << "Enter contrast (-255 to 255): ";
+                cin >> contrast;
+                image = adjust_colors(image, brightness, contrast);
+                break;
+            }
+            case 5: {
+                Rect roi;
+                cout << "Enter crop region (x, y, w, h): ";
+                cin >> roi.x >> roi.y >> roi.width >> roi.height;
+                image = crop_image(image, roi);
+                break;
+            }
+            case 6: {
+                Size new_size;
+                cout << "Enter new size (width, height): ";
+                cin >> new_size.width >> new_size.height;
+                image = resize_image(image, new_size);
+                break;
+            }
+            case 7: {
+                string output_filename;
+                cout << "Enter output filename: ";
+                cin >> output_filename;
+                imwrite(output_filename, image);
+                break;
+            }
+            case 8:
+                return 0;
+            default:
+                cerr << "Invalid choice." << endl;
+        }
+
+        display_image(image);
+    }
+
+    return 0;
+}
+
+// Function definitions
+
+Mat load_image(const string& filename) {
+    return imread(filename);
+}
+
+void display_image(const Mat& image) {
+    imshow("Image", image);
+    waitKey(0);
+}
+
+Mat apply_grayscale(const Mat& image) {
+    Mat gray;
+    cvtColor(image, gray, COLOR_BGR2GRAY);
+    return gray;
+}
+
+Mat apply_blur(const Mat& image) {
+    Mat blurred;
+    blur(image, blurred, Size(5, 5));
+    return blurred;
+}
+
+Mat apply_sharpen(const Mat& image) {
+    Mat sharpened;
+    GaussianBlur(image, sharpened, Size(0, 0), 3);
+    addWeighted(image, 1.5, sharpened, -0.5, 0, sharpened);
+    return sharpened;
+}
+
+Mat adjust_colors(const Mat& image, int brightness, int contrast) {
+    Mat adjusted;
+    convertScaleAbs(image, adjusted, contrast / 255.0, brightness);
+    return adjusted;
+}
+
+Mat crop_image(const Mat& image, Rect roi) {
+    return image(roi);
+}
+
+Mat resize_image(const Mat& image, Size new_size) {
+    Mat resized;
+    resize(image, resized, new_size);
+    return resized;
+}
